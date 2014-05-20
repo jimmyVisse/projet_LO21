@@ -10,6 +10,8 @@
 #include <QString>
 #include <QMessageBox>
 #include "UVEditeur.h"
+#include "Dossier.h"
+#include "supprFormation.h"
 
 class Profiler: public QMainWindow {
     Q_OBJECT
@@ -22,6 +24,9 @@ public slots:
     void openUV();
     void openAjoutUV();
     void openSupprUV();
+    void newDossier();
+    void supprCursus();
+    void chargerCursus();
 };
 
 #endif // PROFILER_H

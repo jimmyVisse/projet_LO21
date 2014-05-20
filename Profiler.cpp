@@ -17,11 +17,23 @@ Profiler::Profiler(QWidget *parent): QMainWindow(parent)
     QAction *ajoutUV = mEdition->addAction("&Ajouter UV");
     QAction *supprUV = mEdition->addAction("&Supprimer UV");
 
+    QMenu* mDossier = menuBar()->addMenu("&Dossier");
+    QAction *chargerDossier = mDossier->addAction("&Charger Dossier");
+    QAction *nouveauDossier = mDossier->addAction("&Nouveau Dossier");
+
+    QMenu* mFormation = menuBar()->addMenu("&Formation");
+    QAction *supprCursus = mFormation->addAction("&Supprimer cursus");
+    QAction *chargerCursus = mFormation->addAction("&Charger cursus");
+
     connect(actionChargerUV, SIGNAL(triggered()),this,SLOT(openChargerUV()));
     connect(actionQuitter, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(actionUV, SIGNAL(triggered()),this,SLOT(openUV()));
     connect(ajoutUV, SIGNAL(triggered()),this,SLOT(openAjoutUV()));
     connect(supprUV, SIGNAL(triggered()),this,SLOT(openSupprUV()));
+//    connect(chargerDossier, SIGNAL(triggered()),this,SLOT());
+    connect(nouveauDossier, SIGNAL(triggered()),this,SLOT(newDossier()));
+    connect(supprCursus, SIGNAL(triggered()),this,SLOT(supprCursus()));
+    connect(chargerCursus, SIGNAL(triggered()), this, SLOT(chargerCursus()));
 }
 
 void Profiler::openChargerUV() {
@@ -63,5 +75,36 @@ void Profiler::openSupprUV()
         setCentralWidget(fenetre);
     }catch(UTProfilerException& e) {
         QMessageBox::warning(this, "Suppression", "Erreur"+e.getInfo());
+    }
+}
+
+void Profiler::newDossier()
+{
+    try {
+        NewDossier* fenetre = new NewDossier(this);
+        setCentralWidget(fenetre);
+    }catch(UTProfilerException& e) {
+        QMessageBox::warning(this, "Dossier", "Erreur"+e.getInfo());
+    }
+}
+
+void Profiler::supprCursus()
+{
+    try {
+        SupprimerFormation* fenetre = new SupprimerFormation(this);
+        setCentralWidget(fenetre);
+    }catch(UTProfilerException& e) {
+        QMessageBox::warning(this, "Formation", "Erreur"+e.getInfo());
+    }
+}
+
+void Profiler::chargerCursus()
+{
+    QString chemin = QFileDialog::getOpenFileName();
+    try {
+        if(chemin != "") CursusManager::getInstance().chargerFormation(chemin);
+        QMessageBox::information(this, "Chargement catalogue cursus", "Le catalogue des cursus a ete charge");
+    }catch(UTProfilerException& e) {
+        QMessageBox::warning(this, "Chargement catalogue cursus", e.getInfo());
     }
 }
