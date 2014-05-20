@@ -3,6 +3,8 @@
 
 #include <QString>
 #include <QTextStream>
+#include <QMap>
+#include <QVector>
 //#include <type_traits>
 using namespace std;
 
@@ -42,6 +44,7 @@ public:
 };*/
 
 enum Saison { Automne, Printemps };
+Saison StringToSaison(const QString& s);
 inline QTextStream& operator<<(QTextStream& f, const Saison& s) { if (s==Automne) f<<"A"; else f<<"P"; return f;}
 
 /*template<typename EnumType>
@@ -107,9 +110,7 @@ QTextStream& operator<<(QTextStream& f, const UV& uv);
 
 class UVManager {
 private:
-    UV** uvs;
-    unsigned int nbUV;
-    unsigned int nbMaxUV;
+    QMap<QString, UV*> uvs;
     void addItem(UV* uv);
     bool modification;
     UV* trouverUV(const QString& c) const;
@@ -136,72 +137,6 @@ public:
     void supprimerUV(const QString& c);
     const UV& getUV(const QString& code) const;
     UV& getUV(const QString& code);
-    class Iterator {
-        friend class UVManager;
-        UV** currentUV;
-        unsigned int nbRemain;
-        Iterator(UV** u, unsigned nb):currentUV(u),nbRemain(nb){}
-    public:
-        Iterator():nbRemain(0),currentUV(0){}
-        bool isDone() const { return nbRemain==0; }
-        void next() {
-            if (isDone())
-                throw UTProfilerException("error, next on an iterator which is done");
-            nbRemain--;
-            currentUV++;
-        }
-        UV& current() const {
-            if (isDone())
-                throw UTProfilerException("error, indirection on an iterator which is done");
-            return **currentUV;
-        }
-    };
-    Iterator getIterator() {
-        return Iterator(uvs,nbUV);
-    }
-
-    class iterator {
-        UV** current;
-        iterator(UV** u):current(u){}
-        friend class UVManager;
-    public:
-        iterator():current(0){}
-        UV& operator*() const { return **current; }
-        bool operator!=(iterator it) const { return current!=it.current; }
-        iterator& operator++(){ ++current; return *this; }
-    };
-    iterator begin() { return iterator(uvs); }
-    iterator end() { return iterator(uvs+nbUV); }
-
-    class FilterIterator {
-        friend class UVManager;
-        UV** currentUV;
-        unsigned int nbRemain;
-        Categorie categorie;
-        FilterIterator(UV** u, unsigned nb, Categorie c):currentUV(u),nbRemain(nb),categorie(c){
-            while(nbRemain>0 && (*currentUV)->getCategorie()!=categorie){
-                nbRemain--; currentUV++;
-            }
-        }
-    public:
-        FilterIterator():nbRemain(0),currentUV(0){}
-        bool isDone() const { return nbRemain==0; }
-        void next() {
-            if (isDone())
-                throw UTProfilerException("error, next on an iterator which is done");
-            do {
-                nbRemain--; currentUV++;
-            }while(nbRemain>0 && (*currentUV)->getCategorie()!=categorie);
-        }
-        UV& current() const {
-            if (isDone())
-                throw UTProfilerException("error, indirection on an iterator which is done");
-            return **currentUV;
-        }
-    };
-    FilterIterator getFilterIterator(Categorie c) {
-        return FilterIterator(uvs,nbUV,c);
-    }
 };
 
 
@@ -218,30 +153,27 @@ public:
 };
 
 class Formation {
-
 private:
     QString nom;
     UV** uvs;
-    unsigned int nb_UVs;
-    unsigned int nbMaxUVs;
+    unsigned int nb_Uvs;
+    unsigned int nbMaxUvs;
+    //friend class CursusManager;
 
 public:
     Formation(const QString& n);
     ~Formation();
     const QString getNom() const { return nom; }
     UV& getUV(const QString &code) const;
-    void ajoutUV(UV* uv);
+    void ajoutUV(UV& uv);
 };
 
 
 class Dossier {
-
 private:
     const QString nomEtu;
     const QString prenomEtu;
-    Inscription** inscriptions;
-    unsigned int nbInsc;
-    unsigned int nbMaxInsc;
+    QVector<Inscription*> inscriptions;
     Formation cursus;
     unsigned int nb_Credits;
     QString file;
@@ -263,37 +195,19 @@ public:
 
 
 class CursusManager {
-    Formation** cursus;
-    unsigned int nb_cursus;
-    unsigned int nb_max_cursus;
+    QMap<QString, Formation*> cursus;
     CursusManager();
     ~CursusManager();
+    QString file;
     static CursusManager* instance;
 
 public:
     static CursusManager& getInstance();
     static void libererInstance();
-
-    class iterateur {
-        Formation** currentItem;
-        unsigned int nb_Restant;
-        iterateur(Formation** f, unsigned int nb): currentItem(f), nb_Restant(nb) {}
-        friend class CursusManager;
-    public:
-        iterateur(): currentItem(0), nb_Restant(0) {}
-        bool isDone() const { return nb_Restant==0; }
-        Formation& current() const {
-            if(isDone())
-                throw UTProfilerException("Erreur, plus de formation");
-            return **currentItem;
-        }
-        void next() {
-            if(isDone())
-                throw UTProfilerException("Erreur, plus de formation");
-            ++currentItem; nb_Restant++;
-        }
-    };
-    iterateur getIterateur() { return iterateur(cursus, nb_cursus); }
+    void chargerFormation(const QString& f);
+    void supprimerCurusus(const QString& c);
+    void sauverFormation(const QString &f);
+    QMap<QString, Formation*> getCursus() const { return cursus; }
 };
 
 Formation StringToFormation(const QString& s);

@@ -1,10 +1,10 @@
-#include <QApplication>
-#include <QWidget>
-#include <QLineEdit>
-#include <QTextEdit>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QFileDialog>
+//#include <QApplication>
+//#include <QWidget>
+//#include <QLineEdit>
+//#include <QTextEdit>
+//#include <QPushButton>
+//#include <QVBoxLayout>
+//#include <QFileDialog>
 #include <QString>
 #include "UTProfiler.h"
 #include "UVEditeur.h"
