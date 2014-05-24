@@ -12,6 +12,7 @@
 #include "UVEditeur.h"
 #include "Dossier.h"
 #include "supprFormation.h"
+#include "CursusEditeur.h"
 
 class Profiler: public QMainWindow {
     Q_OBJECT
@@ -27,6 +28,7 @@ public slots:
     void newDossier();
     void supprCursus();
     void chargerCursus();
+    void editCursus();
 };
 
 #endif // PROFILER_H

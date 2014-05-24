@@ -24,6 +24,7 @@ Profiler::Profiler(QWidget *parent): QMainWindow(parent)
     QMenu* mFormation = menuBar()->addMenu("&Formation");
     QAction *supprCursus = mFormation->addAction("&Supprimer cursus");
     QAction *chargerCursus = mFormation->addAction("&Charger cursus");
+    QAction *editerCursus = mFormation->addAction("&Editer cursus");
 
     connect(actionChargerUV, SIGNAL(triggered()),this,SLOT(openChargerUV()));
     connect(actionQuitter, SIGNAL(triggered()), qApp, SLOT(quit()));
@@ -34,12 +35,14 @@ Profiler::Profiler(QWidget *parent): QMainWindow(parent)
     connect(nouveauDossier, SIGNAL(triggered()),this,SLOT(newDossier()));
     connect(supprCursus, SIGNAL(triggered()),this,SLOT(supprCursus()));
     connect(chargerCursus, SIGNAL(triggered()), this, SLOT(chargerCursus()));
+    connect(editerCursus, SIGNAL(triggered()), this, SLOT(editCursus()));
 }
 
 void Profiler::openChargerUV() {
-    QString chemin = QFileDialog::getOpenFileName();
+//    QString chemin = QFileDialog::getOpenFileName();
     try {
-        if(chemin != "") UVManager::getInstance().load(chemin);
+//        if(chemin != "") UVManager::getInstance().load(chemin);
+        UVManager::getInstance().load("C:/Users/Jimmy/Documents/utc/GI/LO21/projet_lo21/UV_XML.xml");
         QMessageBox::information(this, "Chargement catalogue", "Le catalogue d'UVs a ete charge");
     }catch(UTProfilerException& e) {
         QMessageBox::warning(this, "Chargement catalogue", "Erreur lors du chargement du fichier (non valide ?)");
@@ -100,11 +103,26 @@ void Profiler::supprCursus()
 
 void Profiler::chargerCursus()
 {
-    QString chemin = QFileDialog::getOpenFileName();
+//    QString chemin = QFileDialog::getOpenFileName();
     try {
-        if(chemin != "") CursusManager::getInstance().chargerFormation(chemin);
+//        if(chemin != "") CursusManager::getInstance().chargerFormation(chemin);
+        CursusManager::getInstance().load("C:/Users/Jimmy/Documents/utc/GI/LO21/projet_lo21/UV_Cursus2.xml");
         QMessageBox::information(this, "Chargement catalogue cursus", "Le catalogue des cursus a ete charge");
     }catch(UTProfilerException& e) {
         QMessageBox::warning(this, "Chargement catalogue cursus", e.getInfo());
+    }
+}
+
+void Profiler::editCursus() {
+    QString nom = QInputDialog::getText(this,"Entrez le nom de la formation à éditer","Formation");
+    if (nom!="") {
+        try {
+            Formation& f = CursusManager::getInstance().getFormation(nom);
+            CEditeur* fenetre = new CEditeur(&f, this);
+            setCentralWidget(fenetre);
+        }
+        catch(UTProfilerException& e) {
+            QMessageBox::warning(this, "Editeur de cursus", e.getInfo());
+        }
     }
 }
