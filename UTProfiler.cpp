@@ -1,11 +1,6 @@
 #include "UTProfiler.h"
 
 #include <sstream>
-#include <QFile>
-#include <QTextCodec>
-#include <QtXml>
-#include <QMessageBox>
-#include <sstream>
 
 QTextStream& operator<<(QTextStream& f, const UV& uv){
     return f<<uv.getCode()<<", "<<uv.getCategorie()<<", "<<uv.getNbCredits()<<" credits, "<<uv.getTitre();
@@ -134,22 +129,33 @@ Semestre StringToSemestre(const QString& s)
     return Semestre(StringToSaison(s.mid(0, 1)), s.mid(1,2).toUInt()); //utilisation de mid qui renvoie permet d'extraire des sous-chaines d'une chaine de caractères
 }
 
+Manager::Manager(const QString &f): file(f) {}
 
-UVManager::UVManager():uvs(),file(""),modification(false){
-}
+Manager::~Manager() {}
 
-
-void UVManager::load(const QString& f){
-    if (file!=f) this->~UVManager();
+//Utilisation du design pattern Template method pour le chargement des fichiers
+void Manager::load(const QString &f) {
+    //Activité d'ouverture du fichier commun à tous les algorithmes de chargement
+    if (file!=f) this->~Manager();
     file=f;
-
     QFile fin(file);
-    // If we can't open it, let's show an error message.
-    if (!fin.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        throw UTProfilerException("Erreur ouverture fichier UV");
+    if(!fin.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        throw UTProfilerException("Erreur ouverture du fichier");
     }
     // QXmlStreamReader takes any QIODevice.
     QXmlStreamReader xml(&fin);
+    lireFichier(xml);
+
+    // Error handling.
+    if(xml.hasError()) {
+        throw UTProfilerException("Erreur lecteur fichier, parser xml");
+    }
+    // Removes any device() or data from the reader * and resets its internal state to the initial state.
+    xml.clear();
+
+}
+
+void UVManager::lireFichier(QXmlStreamReader& xml) {
     // We'll parse the XML until we reach end of it.
     while(!xml.atEnd() && !xml.hasError()) {
         // Read next element.
@@ -212,44 +218,45 @@ void UVManager::load(const QString& f){
             }
         }
     }
-    // Error handling.
-    if(xml.hasError()) {
-        throw UTProfilerException("Erreur lecteur fichier UV, parser xml");
-    }
-    // Removes any device() or data from the reader * and resets its internal state to the initial state.
-    xml.clear();
 }
 
-
-
-void UVManager::save(const QString& f){
+void Manager::save(const QString &f) {
     file=f;
-    QFile newfile( file);
+    QFile newfile(file);
     if (!newfile.open(QIODevice::WriteOnly | QIODevice::Text)) throw UTProfilerException(QString("erreur ouverture fichier xml"));
-     QXmlStreamWriter stream(&newfile);
-     stream.setAutoFormatting(true);
-     stream.writeStartDocument();
-     stream.writeStartElement("uvs");
-     for(QMap<QString, UV*>::iterator it = uvs.begin(); it!=uvs.end(); it++) {
-         stream.writeStartElement("uv");
-         stream.writeAttribute("automne", ((*it)->ouvertureAutomne())?"true":"false");
-         stream.writeAttribute("printemps", ((*it)->ouverturePrintemps())?"true":"false");
-         stream.writeTextElement("code",(*it)->getCode());
-         stream.writeTextElement("titre",(*it)->getTitre());
-         QString cr; cr.setNum((*it)->getNbCredits());
-         stream.writeTextElement("credits",cr);
-         stream.writeTextElement("categorie",CategorieToString((*it)->getCategorie()));
-         stream.writeEndElement();
-     }
-     stream.writeEndElement();
-     stream.writeEndDocument();
+    QXmlStreamWriter stream(&newfile);
+    stream.setAutoFormatting(true);
+    stream.writeStartDocument();
 
-     newfile.close();
+    ecrireFichier(&stream);
 
+    stream.writeEndElement();
+    stream.writeEndDocument();
+
+    newfile.close();
 }
+
+void UVManager::ecrireFichier(QXmlStreamWriter *r) {
+    r->writeStartElement("uvs");
+    for(QMap<QString, UV*>::iterator it = uvs.begin(); it!=uvs.end(); it++) {
+        r->writeStartElement("uv");
+        r->writeAttribute("automne", ((*it)->ouvertureAutomne())?"true":"false");
+        r->writeAttribute("printemps", ((*it)->ouverturePrintemps())?"true":"false");
+        r->writeTextElement("code",(*it)->getCode());
+        r->writeTextElement("titre",(*it)->getTitre());
+        QString cr; cr.setNum((*it)->getNbCredits());
+        r->writeTextElement("credits",cr);
+        r->writeTextElement("categorie",CategorieToString((*it)->getCategorie()));
+        r->writeEndElement();
+    }
+}
+
+UVManager::UVManager(const QString &f): Manager(f), modification(false) {}
 
 UVManager::~UVManager(){
-    if (file!="") save(file);
+    if (file!="") {
+        save(file);
+    }
     uvs.clear();
 }
 
@@ -300,7 +307,10 @@ const UV& UVManager::getUV(const QString& code)const{
 UVManager::Handler UVManager::handler=Handler();
 
 UVManager& UVManager::getInstance(){
-    if (!handler.instance) handler.instance = new UVManager; /* instance créée une seule fois lors de la première utilisation*/
+    if (!handler.instance) {
+        QString chemin("C:/Users/Jimmy/Documents/utc/GI/LO21/projet_lo21/UV_XML.xml");
+        handler.instance = new UVManager(chemin); /* instance créée une seule fois lors de la première utilisation*/
+    }
     return *handler.instance;
 }
 
@@ -322,98 +332,88 @@ Dossier::~Dossier()
 void Dossier::chargerDossier(const QString& f)
 {
     if (file!=f) this->~Dossier();
-    file=f;
+        file=f;
 
-    QFile fin(file);
-    // If we can't open it, let's show an error message.
-    if (!fin.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        throw UTProfilerException("Erreur ouverture fichier Dossier");
-    }
-    // QXmlStreamReader takes any QIODevice.
-    QXmlStreamReader xml(&fin);
-    // We'll parse the XML until we reach end of it.
-    while(!xml.atEnd() && !xml.hasError()) {
-        // Read next element.
-        QXmlStreamReader::TokenType token = xml.readNext();
-        // If token is just StartDocument, we'll go to next.
-        if(token == QXmlStreamReader::StartDocument) continue;
-        // If token is StartElement, we'll see if we can read it.
-        if(token == QXmlStreamReader::StartElement) {
-            // If it's named dossiers, we'll go to the next.
-            if(xml.name() == "dossiers") continue;
-            // If it's named etudiant, we'll dig the information from there.
-            if(xml.name() == "etudiant") {
-                QString nom;
-                QString prenom;
-                QString form;
-                Note resultat;
-                QString semestre;
-                QString uv;
+        QFile fin(file);
+        // If we can't open it, let's show an error message.
+        if (!fin.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            throw UTProfilerException("Erreur ouverture fichier Dossier");
+        }
+        // QXmlStreamReader takes any QIODevice.
+        QXmlStreamReader xml(&fin);
+        // We'll parse the XML until we reach end of it.
+        while(!xml.atEnd() && !xml.hasError()) {
+            // Read next element.
+            QXmlStreamReader::TokenType token = xml.readNext();
+            // If token is just StartDocument, we'll go to next.
+            if(token == QXmlStreamReader::StartDocument) continue;
+            // If token is StartElement, we'll see if we can read it.
+            if(token == QXmlStreamReader::StartElement) {
+                // If it's named dossiers, we'll go to the next.
+                if(xml.name() == "dossier") {
+                    QString nom;
+                    QString prenom;
+                    QString form;
 
-                QXmlStreamAttributes attributes = xml.attributes();
-                /* Let's check that eudiants has attribute. */
-                if(attributes.hasAttribute("nom")) {
-                    QString val =attributes.value("nom").toString();
-                    nom = val;
-                }
-
-                if(attributes.hasAttribute("prenom")) {
-                    QString val =attributes.value("prenom").toString();
-                    prenom = val;
-                }
-
-                if(attributes.hasAttribute("cursus")) {
-                    QString val =attributes.value("cursus").toString();
-                    form = val;
-                }
-
-                //If it isn't the student we target, we are going to read another XML element
-                if(nom!=nomEtu || prenom!=prenomEtu || form!=cursus.getNom()) continue;
-
-                xml.readNext();
-                //We're going to loop over the things because the order might change.
-                //We'll continue the loop until we hit an EndElement named etudiant.
-
-
-                while(!(xml.tokenType() == QXmlStreamReader::EndElement && xml.name() == "etudiant")) {
-                    if(xml.tokenType() == QXmlStreamReader::StartElement) {
-                        //If it's named inscription, we'll go next
-                        if(xml.name() == "inscription") {
-                            xml.readNext();
-                            continue;
-                        }
-
-                        while(!(xml.tokenType() == QXmlStreamReader::EndElement && xml.name() == "inscription")) {
-                            if(xml.tokenType() == QXmlStreamReader::StartElement) {
-                                if(xml.name() == "resultat") {
-                                    xml.readNext();
-                                    resultat = StringToNote(xml.text().toString());
-                                }
-                                if(xml.name() == "semestre") {
-                                    xml.readNext();
-                                    semestre = xml.text().toString();
-                                }
-                                if(xml.name() == "uv") {
-                                    xml.readNext();
-                                    uv = xml.text().toString();
-                                }
-                            }
-                            xml.readNext();
-                        }
+                    QXmlStreamAttributes attributes = xml.attributes();
+                    /* Let's check that eudiants has attribute. */
+                    if(attributes.hasAttribute("nom")) {
+                        QString val =attributes.value("nom").toString();
+                        nom = val;
                     }
-                    // ...and next...
-                    xml.readNext();
+
+                    if(attributes.hasAttribute("prenom")) {
+                        QString val =attributes.value("prenom").toString();
+                        prenom = val;
+                    }
+
+                    if(attributes.hasAttribute("cursus")) {
+                        QString val =attributes.value("cursus").toString();
+                        form = val;
+                    }
+                    nomEtu = nom;
+                    prenomEtu = prenom;
+                    cursus = Formation(form);
                 }
-                ajoutInscription(UVManager::getInstance().getUV(uv), resultat, StringToSemestre(semestre));
+
+                // If it's named etudiant, we'll dig the information from there.
+                if(xml.name() == "inscription") {
+                    Note resultat;
+                    QString semestre;
+                    QString uv;
+
+                    xml.readNext();
+                    //We're going to loop over the things because the order might change.
+                    //We'll continue the loop until we hit an EndElement named etudiant.
+
+
+                    while(!(xml.tokenType() == QXmlStreamReader::EndElement && xml.name() == "inscription")) {
+                        if(xml.tokenType() == QXmlStreamReader::StartElement) {
+                            if(xml.name() == "resultat") {
+                                xml.readNext();
+                                resultat = StringToNote(xml.text().toString());
+                            }
+                            if(xml.name() == "semestre") {
+                                xml.readNext();
+                                semestre = xml.text().toString();
+                            }
+                            if(xml.name() == "uv") {
+                                xml.readNext();
+                                uv = xml.text().toString();
+                            }
+                        }
+                        xml.readNext();
+                    }
+                    ajoutInscription(UVManager::getInstance().getUV(uv), resultat, StringToSemestre(semestre));
+                }
             }
         }
-    }
-    // Error handling.
-    if(xml.hasError()) {
-        throw UTProfilerException("Erreur lecteur fichier Dossier, parser xml");
-    }
-    // Removes any device() or data from the reader * and resets its internal state to the initial state.
-    xml.clear();
+        // Error handling.
+        if(xml.hasError()) {
+            throw UTProfilerException("Erreur lecteur fichier Dossier, parser xml");
+        }
+        // Removes any device() or data from the reader * and resets its internal state to the initial state.
+        xml.clear();
 }
 
 void Dossier::sauverDossier(const QString& f)
@@ -424,7 +424,10 @@ void Dossier::sauverDossier(const QString& f)
      QXmlStreamWriter stream(&newfile);
      stream.setAutoFormatting(true);
      stream.writeStartDocument();
-     stream.writeStartElement("dossiers");
+     stream.writeStartElement("dossier");
+     stream.writeAttribute("nom", nomEtu);
+     stream.writeAttribute("prenom", prenomEtu);
+     stream.writeAttribute("cursus", cursus.getNom());
      for(QVector<Inscription*>::iterator it = inscriptions.begin(); it!=inscriptions.end(); it++) {
          stream.writeStartElement("inscriprion");
          stream.writeTextElement("resultat", NoteToString((*it)->getResultat()));
@@ -488,45 +491,43 @@ void Formation::ajoutUV(UV& uv)
     uvs[nb_Uvs++] = &uv;
 }
 
-CursusManager* CursusManager::instance = 0;
 
-CursusManager& CursusManager::getInstance()
-{
-    if(instance == 0)
-    {
-        instance = new CursusManager();
+void CursusManager::ecrireFichier(QXmlStreamWriter *r) {
+    r->writeStartElement("formations");
+    for(QMap<QString, Formation*>::iterator it = cursus.begin(); it!=cursus.end(); it++) {
+        r->writeStartElement("cursus");
+        r->writeAttribute("nom", (*it)->getNom());
+        for(unsigned int i=0; i<(*it)->nb_Uvs; i++) {
+            r->writeTextElement("uv", (*it)->uvs[i]->getCode());
+        }
+        r->writeEndElement();
     }
-    return *instance;
 }
 
-CursusManager::CursusManager(): cursus()
+CursusManager::CursusManager(const QString &f): Manager(f), cursus()
 {}
 
 CursusManager::~CursusManager()
 {
+    if(file!="") save(file);
     cursus.clear(); //On efface toutes les données présentes dans le vecteur et on libére la place qu'il occupait
 }
 
-void CursusManager::libererInstance()
-{
-    if(instance!=0) {
-        delete instance;
+CursusManager::Handler CursusManager::handler=Handler();
+
+CursusManager& CursusManager::getInstance(){
+    if (!handler.instance) {
+        QString chemin("C:/Users/Jimmy/Documents/utc/GI/LO21/projet_lo21/UV_Cursus2.xml");
+        handler.instance = new CursusManager(chemin); /* instance créée une seule fois lors de la première utilisation*/
     }
-    instance = 0;
+    return *handler.instance;
 }
 
-void CursusManager::chargerFormation(const QString& f)
-{
-    if (file!=f) this->~CursusManager();
-    file=f;
+void CursusManager::libererInstance(){
+    if (handler.instance) { delete handler.instance; handler.instance=0; }
+}
 
-    QFile fin(file);
-    // If we can't open it, let's show an error message.
-    if (!fin.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        throw UTProfilerException("Erreur ouverture fichier cursus");
-    }
-    // QXmlStreamReader takes any QIODevice.
-    QXmlStreamReader xml(&fin);
+void CursusManager::lireFichier(QXmlStreamReader& xml) {
     // We'll parse the XML until we reach end of it.
     while(!xml.atEnd() && !xml.hasError()) {
         // Read next element.
@@ -548,7 +549,7 @@ void CursusManager::chargerFormation(const QString& f)
                     QString val =attributes.value("nom").toString();
                     nom = val;
                 }
-                cursus[nom] = new Formation(nom);
+                ajouterCursus(nom);
 
                 xml.readNext();
                 //We're going to loop over the things because the order might change.
@@ -569,17 +570,50 @@ void CursusManager::chargerFormation(const QString& f)
             }
         }
     }
-    // Error handling.
-    if(xml.hasError()) {
-        throw UTProfilerException("Erreur lecteur fichier Cursus, parser xml");
-    }
-    // Removes any device() or data from the reader * and resets its internal state to the initial state.
-    xml.clear();
+}
+
+Formation& CursusManager::trouverCursus(const QString& f) {
+    if(cursus.contains(f))
+        return cursus[f];
+    return 0;
 }
 
 void CursusManager::supprimerCurusus(const QString& c)
 {
+    if(!trouverCursus(c))
+        throw UTProfilerException("Erreur supprimer cursus, formztion inexistante");
     cursus.remove(c);
+}
+
+void CursusManager::ajouterCursus(const QString& n)
+{
+    if(!trouverCursus(c))
+        throw UTProfilerException("Erreur ajouter cursus, formztion inexistante");
+    cursus[n]=new Formation(n);
+}
+
+void CursusManager::ajouterUVCursus(const QString &n, const QString &uv) {
+    if(!trouverCursus(c))
+        throw UTProfilerException("Erreur ajouter cursus, formztion inexistante");
+    UV& u = UVManager::getInstance().getUV(uv);
+    cursus[n]->ajoutUV(u);
+}
+
+Formation& CursusManager::getFormation(const QString& f) {
+    if(!trouverCursus(c))
+        throw UTProfilerException("Erreur, cursus inexistant");
+    return *cursus[f];
+}
+
+UV* CursusManager::getUVsCursus(const QString& f) {
+    if(!trouverCursus(c))
+        throw UTProfilerException("Erreur, cursus inexistant");
+    Formation* c = cursus[f];
+//    UV** uvs;
+//    for(unsigned int i=0; i<c->nb_Uvs; i++) {
+//        uvs[i] = c->uvs[i];
+//    }
+    return c->uvs[0];
 }
 
 //Formation StringToFormation(const QString& s)

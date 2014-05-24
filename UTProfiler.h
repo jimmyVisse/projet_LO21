@@ -5,6 +5,9 @@
 #include <QTextStream>
 #include <QMap>
 #include <QVector>
+#include <QFile>
+#include <QTextCodec>
+#include <QtXml>
 //#include <type_traits>
 using namespace std;
 
@@ -107,8 +110,20 @@ public:
 
 QTextStream& operator<<(QTextStream& f, const UV& uv);
 
+class Manager {
+protected:
+    QString file;
+    Manager(const QString& f="");
+    ~Manager();
+public:
+    virtual void load(const QString& f);
+    virtual void lireFichier(QXmlStreamReader& xml) = 0;
+    virtual void save(const QString& f);
+    virtual void ecrireFichier(QXmlStreamWriter* r) = 0;
+};
 
-class UVManager {
+
+class UVManager: public Manager {
 private:
     QMap<QString, UV*> uvs;
     void addItem(UV* uv);
@@ -116,9 +131,8 @@ private:
     UV* trouverUV(const QString& c) const;
     UVManager(const UVManager& um);
     UVManager& operator=(const UVManager& um);
-    UVManager();
+    UVManager(const QString& f);
     ~UVManager();
-    QString file;
     friend struct Handler;
     struct Handler{
         UVManager* instance;
@@ -128,9 +142,8 @@ private:
     static Handler handler;
 
 public:
-
-    void load(const QString& f);
-    void save(const QString& f);
+    void lireFichier(QXmlStreamReader &xml);
+    void ecrireFichier(QXmlStreamWriter *r);
     static UVManager& getInstance();
     static void libererInstance();
     void ajouterUV(const QString& c, const QString& t, unsigned int nbc, Categorie cat, bool a, bool p);
@@ -158,7 +171,7 @@ private:
     UV** uvs;
     unsigned int nb_Uvs;
     unsigned int nbMaxUvs;
-    //friend class CursusManager;
+    friend class CursusManager;
 
 public:
     Formation(const QString& n);
@@ -171,8 +184,8 @@ public:
 
 class Dossier {
 private:
-    const QString nomEtu;
-    const QString prenomEtu;
+    QString nomEtu;
+    QString prenomEtu;
     QVector<Inscription*> inscriptions;
     Formation cursus;
     unsigned int nb_Credits;
@@ -194,20 +207,29 @@ public:
 };
 
 
-class CursusManager {
+class CursusManager: public Manager {
     QMap<QString, Formation*> cursus;
-    CursusManager();
+    CursusManager(const QString& f);
     ~CursusManager();
-    QString file;
-    static CursusManager* instance;
+    Formation& trouverCursus(const QString& f);
+    friend struct Handler;
+    struct Handler{
+        CursusManager* instance;
+        Handler():instance(0){}
+        ~Handler(){ if (instance) delete instance; instance=0; }
+    };
+    static Handler handler;
 
 public:
     static CursusManager& getInstance();
     static void libererInstance();
-    void chargerFormation(const QString& f);
+    void lireFichier(QXmlStreamReader& xml);
+    void ecrireFichier(QXmlStreamWriter* r);
     void supprimerCurusus(const QString& c);
-    void sauverFormation(const QString &f);
-    QMap<QString, Formation*> getCursus() const { return cursus; }
+    void ajouterCursus(const QString& n);
+    void ajouterUVCursus(const QString& n, const QString& uv);
+    Formation& getFormation(const QString& f);
+    UV *getUVsCursus(const QString& f);
 };
 
 Formation StringToFormation(const QString& s);
