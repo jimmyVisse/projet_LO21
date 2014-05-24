@@ -3,7 +3,7 @@
 
 #include <QApplication>
 #include <QWidget>
-#include <QComboBox>
+#include <QLineEdit>
 #include <QLabel>
 #include <QPushButton>
 #include <QHBoxLayout>
@@ -14,7 +14,7 @@
 class SupprimerFormation: public QWidget {
     Q_OBJECT
 private:
-    QComboBox* choixCursus;
+    QLineEdit* choixCursus;
     QPushButton* valider;
     QLabel* texte;
     QHBoxLayout* coucheH1;

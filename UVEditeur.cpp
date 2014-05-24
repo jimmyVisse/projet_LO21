@@ -70,7 +70,7 @@ UVEditeur::UVEditeur(UV& uvToEdit, QWidget *parent): QWidget(parent), uv(uvToEdi
 void UVEditeur::sauverUV()
 {
     uv.setCode(code->text());
-    //uv.setTitre(titre->toPlainText());
+    uv.setTitre(titre->toPlainText());
     uv.setNbCredits(cred->value());
     uv.setCategorie(Categorie(catego->currentIndex()));
     uv.setOuverturePrintemps(printemps->isChecked());

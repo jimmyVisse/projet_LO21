@@ -6,11 +6,7 @@ SupprimerFormation::SupprimerFormation(QWidget* parent): QWidget(parent)
 
     valider = new QPushButton("Valider", this);
 
-    choixCursus = new QComboBox(this);
-//    for(QMap<QString, Formation*>::iterator it = CursusManager::getInstance().getCursus().begin(); it!= CursusManager::getInstance().getCursus().end(); it++)
-//    {
-//        choixCursus->addItem((*it)->getNom());
-//    }
+    choixCursus = new QLineEdit(this);
 
     coucheH1 = new QHBoxLayout;
     coucheH1->addWidget(texte);
@@ -28,13 +24,7 @@ SupprimerFormation::SupprimerFormation(QWidget* parent): QWidget(parent)
 void SupprimerFormation::supprimer()
 {
     try {
-        int i=0;
-        QMap<QString, Formation*>::iterator it = CursusManager::getInstance().getCursus().begin();
-        while(i<choixCursus->currentIndex()) {
-            i++;
-            it++;
-        }
-        CursusManager::getInstance().supprimerCurusus((*it)->getNom());
+        CursusManager::getInstance().supprimerCurusus(choixCursus->text());
         QMessageBox::information(this, "Suppression Formation", "Cursus supprimé ...");
     }catch(UTProfilerException& e) {
         QMessageBox::warning(this, "Suppression Formation", e.getInfo());

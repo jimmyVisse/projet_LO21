@@ -67,7 +67,7 @@ UVAjout::UVAjout(QWidget* parent): QWidget(parent)
 void UVAjout::sauverUV()
 {
     try {
-        UVManager::getInstance().ajouterUV(code->text(), "Titre", cred->value(), Categorie(catego->currentIndex()), automne->isChecked(), printemps->isChecked());
+        UVManager::getInstance().ajouterUV(code->text(), titre->toPlainText(), cred->value(), Categorie(catego->currentIndex()), automne->isChecked(), printemps->isChecked());
         QMessageBox::information(this, "Sauvegarde", "UV sauvegardée ...");
     }
     catch(UTProfilerException& e) {
