@@ -572,7 +572,7 @@ void CursusManager::lireFichier(QXmlStreamReader& xml) {
     }
 }
 
-Formation& CursusManager::trouverCursus(const QString& f) {
+Formation *CursusManager::trouverCursus(const QString& f) const {
     if(cursus.contains(f))
         return cursus[f];
     return 0;
@@ -581,32 +581,32 @@ Formation& CursusManager::trouverCursus(const QString& f) {
 void CursusManager::supprimerCurusus(const QString& c)
 {
     if(!trouverCursus(c))
-        throw UTProfilerException("Erreur supprimer cursus, formztion inexistante");
+        throw UTProfilerException("Erreur supprimer cursus, formation inexistante");
     cursus.remove(c);
 }
 
 void CursusManager::ajouterCursus(const QString& n)
 {
-    if(!trouverCursus(c))
-        throw UTProfilerException("Erreur ajouter cursus, formztion inexistante");
+    if(trouverCursus(n))
+        throw UTProfilerException("Erreur ajouter cursus, formation déjà existante");
     cursus[n]=new Formation(n);
 }
 
 void CursusManager::ajouterUVCursus(const QString &n, const QString &uv) {
-    if(!trouverCursus(c))
-        throw UTProfilerException("Erreur ajouter cursus, formztion inexistante");
+    if(trouverCursus(n))
+        throw UTProfilerException("Erreur ajouter une UV à un cursus, formation déjà existante");
     UV& u = UVManager::getInstance().getUV(uv);
     cursus[n]->ajoutUV(u);
 }
 
 Formation& CursusManager::getFormation(const QString& f) {
-    if(!trouverCursus(c))
+    if(!trouverCursus(f))
         throw UTProfilerException("Erreur, cursus inexistant");
     return *cursus[f];
 }
 
 UV* CursusManager::getUVsCursus(const QString& f) {
-    if(!trouverCursus(c))
+    if(!trouverCursus(f))
         throw UTProfilerException("Erreur, cursus inexistant");
     Formation* c = cursus[f];
 //    UV** uvs;

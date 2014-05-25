@@ -211,7 +211,7 @@ class CursusManager: public Manager {
     QMap<QString, Formation*> cursus;
     CursusManager(const QString& f);
     ~CursusManager();
-    Formation& trouverCursus(const QString& f);
+    Formation* trouverCursus(const QString& f) const;
     friend struct Handler;
     struct Handler{
         CursusManager* instance;
