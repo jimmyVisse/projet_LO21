@@ -8,11 +8,13 @@ Profiler::Profiler(QWidget *parent): QMainWindow(parent)
 {
     setWindowTitle("UT-Profiler");
     QMenu* mFichier = menuBar()->addMenu("&Fichier");
+    QAction *actionQuitter = mFichier->addAction("&Quitter");
     QMenu* mCharger = menuBar()->addMenu("&Charger");
     QAction *actionChargerUV = mCharger->addAction("Catalogue UVs");
     mFichier->addSeparator();
-    QAction *actionQuitter = mFichier->addAction("&Quitter");
-    QMenu* mEdition = menuBar()->addMenu("&Edition");
+    QAction *chargerCursus = mCharger->addAction("&Catalogue cursus");
+
+    QMenu* mEdition = menuBar()->addMenu("&UV");
     QAction *actionUV = mEdition->addAction("&Editer UV");
     QAction *ajoutUV = mEdition->addAction("&Ajouter UV");
     QAction *supprUV = mEdition->addAction("&Supprimer UV");
@@ -20,22 +22,23 @@ Profiler::Profiler(QWidget *parent): QMainWindow(parent)
     QMenu* mDossier = menuBar()->addMenu("&Dossier");
     QAction *chargerDossier = mDossier->addAction("&Charger Dossier");
     QAction *nouveauDossier = mDossier->addAction("&Nouveau Dossier");
+    QAction *editerDossier = mDossier->addAction("&Editer Dossier");
 
     QMenu* mFormation = menuBar()->addMenu("&Formation");
-    QAction *supprCursus = mFormation->addAction("&Supprimer cursus");
-    QAction *chargerCursus = mFormation->addAction("&Charger cursus");
     QAction *editerCursus = mFormation->addAction("&Editer cursus");
+    QAction *supprCursus = mFormation->addAction("&Supprimer cursus");
 
     connect(actionChargerUV, SIGNAL(triggered()),this,SLOT(openChargerUV()));
     connect(actionQuitter, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(actionUV, SIGNAL(triggered()),this,SLOT(openUV()));
     connect(ajoutUV, SIGNAL(triggered()),this,SLOT(openAjoutUV()));
     connect(supprUV, SIGNAL(triggered()),this,SLOT(openSupprUV()));
-//    connect(chargerDossier, SIGNAL(triggered()),this,SLOT());
+    connect(chargerDossier, SIGNAL(triggered()),this,SLOT(chargerDossier()));
     connect(nouveauDossier, SIGNAL(triggered()),this,SLOT(newDossier()));
     connect(supprCursus, SIGNAL(triggered()),this,SLOT(supprCursus()));
     connect(chargerCursus, SIGNAL(triggered()), this, SLOT(chargerCursus()));
     connect(editerCursus, SIGNAL(triggered()), this, SLOT(editCursus()));
+    connect(editerDossier, SIGNAL(triggered()), this, SLOT(editDossier()));
 }
 
 void Profiler::openChargerUV() {
@@ -124,5 +127,26 @@ void Profiler::editCursus() {
         catch(UTProfilerException& e) {
             QMessageBox::warning(this, "Editeur de cursus", e.getInfo());
         }
+    }
+}
+
+void Profiler::chargerDossier()
+{
+    QString chemin = QFileDialog::getOpenFileName();
+    try {
+        if(chemin != "") Dossier::getInstance().chargerDossier(chemin);
+        QMessageBox::information(this, "Chargement dossier", "Le dossier a ete charge");
+    }catch(UTProfilerException& e) {
+        QMessageBox::warning(this, "Chargement catalogue cursus", e.getInfo());
+    }
+}
+
+void Profiler::editDossier()
+{
+    try {
+        EditDossier* fenetre = new EditDossier(&Dossier::getInstance());
+        setCentralWidget(fenetre);
+    }catch(UTProfilerException& e) {
+        QMessageBox::warning(this, "Chargement catalogue cursus", e.getInfo());
     }
 }
