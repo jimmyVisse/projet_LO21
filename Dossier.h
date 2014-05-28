@@ -10,9 +10,9 @@
 #include <QVBoxLayout>
 #include "UTProfiler.h"
 
-class NewDossier: public QWidget {
+class DossierEdit: public QWidget {
     Q_OBJECT
-private:
+protected:
     QLabel* texte;
     QLabel* nomLabel;
     QLabel* prenomLabel;
@@ -27,29 +27,19 @@ private:
     QHBoxLayout* coucheH4;
     QHBoxLayout* coucheH5;
     QVBoxLayout* couche;
-
 public:
-    explicit NewDossier(QWidget* parent=0);
+    DossierEdit(QWidget* parent=0);
 };
 
-class EditDossier: public QWidget {
-    Q_OBJECT
+
+class NewDossier: public DossierEdit {
+public:
+    explicit NewDossier(QWidget *parent=0);
+};
+
+class EditDossier: public DossierEdit {
 private:
-    Dossier *d;
-    QLabel* texte;
-    QLabel* nomLabel;
-    QLabel* prenomLabel;
-    QLabel* cursusLabel;
-    QLineEdit* nom;
-    QLineEdit* prenom;
-    QLineEdit* cursus;
-    QPushButton* bouton;
-    QHBoxLayout* coucheH1;
-    QHBoxLayout* coucheH2;
-    QHBoxLayout* coucheH3;
-    QHBoxLayout* coucheH4;
-    QHBoxLayout* coucheH5;
-    QVBoxLayout* couche;
+    Dossier* d;
 public:
     explicit EditDossier(Dossier *dToEdit, QWidget* parent=0);
 };
