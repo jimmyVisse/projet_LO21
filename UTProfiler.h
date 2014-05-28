@@ -190,15 +190,25 @@ private:
     Formation cursus;
     unsigned int nb_Credits;
     QString file;
+    friend struct Handler;
+    struct Handler{
+        Dossier* instance;
+        Handler():instance(0){}
+        ~Handler(){ if (instance) delete instance; instance=0; }
+    };
+    static Handler handler;
 
 public:
     Dossier(const QString &n, const QString& p);
     ~Dossier();
+    static Dossier& getInstance();
+    static void libererInstance();
     void chargerDossier(const QString& f);
     void sauverDossier(const QString& f);
     const QString getNom() const { return nomEtu; }
     const QString getPrenom() const { return prenomEtu; }
     unsigned int getNbCredits() const { return nb_Credits; }
+    Formation getCursus() const { return cursus; }
     void setCursus(const Formation& f);
     void ajouterEquivalence(unsigned int credits);
     void ajoutInscription(const UV& uv, Note res, Semestre sem);
@@ -231,8 +241,6 @@ public:
     Formation& getFormation(const QString& f);
     UV *getUVsCursus(const QString& f);
 };
-
-Formation StringToFormation(const QString& s);
 
 
 #endif

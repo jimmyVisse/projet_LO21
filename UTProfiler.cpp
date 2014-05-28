@@ -1,7 +1,5 @@
 #include "UTProfiler.h"
 
-#include <sstream>
-
 QTextStream& operator<<(QTextStream& f, const UV& uv){
     return f<<uv.getCode()<<", "<<uv.getCategorie()<<", "<<uv.getNbCredits()<<" credits, "<<uv.getTitre();
 }
@@ -126,7 +124,7 @@ QString SemestreToString(const Semestre& sem)
 //Transformation d'une chaine de caractère en Semestre
 Semestre StringToSemestre(const QString& s)
 {
-    return Semestre(StringToSaison(s.mid(0, 1)), s.mid(1,2).toUInt()); //utilisation de mid qui renvoie permet d'extraire des sous-chaines d'une chaine de caractères
+    return Semestre(StringToSaison(s.mid(0, 1)), s.mid(1,4).toUInt()); //utilisation de mid qui renvoie permet d'extraire des sous-chaines d'une chaine de caractères
 }
 
 Manager::Manager(const QString &f): file(f) {}
@@ -329,6 +327,21 @@ Dossier::~Dossier()
     inscriptions.clear();
 }
 
+Dossier::Handler Dossier::handler=Handler();
+
+Dossier& Dossier::getInstance(){
+    if (!handler.instance) {
+//        QString chemin("C:/Users/Jimmy/Documents/utc/GI/LO21/projet_lo21/UV_XML.xml");
+        handler.instance = new Dossier("", ""); /* instance créée une seule fois lors de la première utilisation*/
+    }
+    return *handler.instance;
+}
+
+void Dossier::libererInstance(){
+    if (handler.instance) { delete handler.instance; handler.instance=0; }
+}
+
+
 void Dossier::chargerDossier(const QString& f)
 {
     if (file!=f) this->~Dossier();
@@ -349,7 +362,6 @@ void Dossier::chargerDossier(const QString& f)
             if(token == QXmlStreamReader::StartDocument) continue;
             // If token is StartElement, we'll see if we can read it.
             if(token == QXmlStreamReader::StartElement) {
-                // If it's named dossiers, we'll go to the next.
                 if(xml.name() == "dossier") {
                     QString nom;
                     QString prenom;
@@ -373,7 +385,7 @@ void Dossier::chargerDossier(const QString& f)
                     }
                     nomEtu = nom;
                     prenomEtu = prenom;
-                    cursus = Formation(form);
+                    cursus = CursusManager::getInstance().getFormation(form);
                 }
 
                 // If it's named etudiant, we'll dig the information from there.
@@ -419,7 +431,7 @@ void Dossier::chargerDossier(const QString& f)
 void Dossier::sauverDossier(const QString& f)
 {
     file=f;
-    QFile newfile( file);
+    QFile newfile(file);
     if (!newfile.open(QIODevice::WriteOnly | QIODevice::Text)) throw UTProfilerException(QString("erreur ouverture fichier xml"));
      QXmlStreamWriter stream(&newfile);
      stream.setAutoFormatting(true);
@@ -616,11 +628,3 @@ UV* CursusManager::getUVsCursus(const QString& f) {
     return c->uvs[0];
 }
 
-//Formation StringToFormation(const QString& s)
-//{
-//    for(CursusManager::iterateur it = CursusManager::getInstance().getIterateur(); !it.isDone(); it.next())
-//    {
-//        if(it.current().getNom() == s)
-//            return it.current();
-//    }
-//}
