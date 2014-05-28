@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dossier nom="Visse" prenom="Jimmy" cursus="TC">
+	<inscription>
+		<resultat>C</resultat>
+		<semestre>A2011</semestre>
+		<uv>MT90</uv>
+	</inscription>
+</dossier>
