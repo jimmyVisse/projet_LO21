@@ -9,6 +9,8 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QComboBox>
+#include <QMessageBox>
+#include <QInputDialog>
 #include "UTProfiler.h"
 
 class CEditeur: public QWidget {
@@ -25,8 +27,13 @@ private:
     QLabel* nomLabel;
     QLabel* uvLabel;
     QLineEdit* nom;
-    QPushButton* valider;
+    QPushButton* ajouter;
+    QPushButton* supprimer;
     QComboBox* listeUV;
+
+public slots:
+    void ajoutUV();
+    void supprUV();
 };
 
 
