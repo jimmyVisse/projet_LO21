@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<formations>
+    <cursus nom="TC">
+        <uv>BL01</uv>
+        <uv>BL09</uv>
+        <uv>BL22</uv>
+        <uv>BT02</uv>
+        <uv>C2I1</uv>
+        <uv>CM01</uv>
+        <uv>CM11</uv>
+        <uv>CM12</uv>
+        <uv>LO21</uv>
+    </cursus>
+    <cursus nom="Test">
+        <uv>MT90</uv>
+    </cursus>
+</formations>
