@@ -3,7 +3,6 @@
 
 #include <QApplication>
 #include <QWidget>
-#include <QString>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLineEdit>
@@ -16,11 +15,8 @@
 #include <QMessageBox>
 #include "UTProfiler.h"
 
-class UVEditeur : public QWidget
-{
-    Q_OBJECT
-private:
-    UV& uv;
+class Editeur: public QWidget {
+protected:
     QVBoxLayout* couche;
     QHBoxLayout* coucheH1;
     QHBoxLayout* coucheH2;
@@ -34,14 +30,31 @@ private:
     QSpinBox *cred;
     QComboBox *catego;
 
+public:
+    explicit Editeur(QWidget* parent=0);
+};
+
+class UVEditeur : public Editeur
+{
+    Q_OBJECT
+private:
+    UV& uv;
     public slots:
     void sauverUV();
-
 private slots:
     void activerSauver(QString str="");
-
 public:
     explicit UVEditeur(UV& uvToEdit, QWidget *parent=0);
+};
+
+class UVAjout: public Editeur {
+    Q_OBJECT
+    public slots:
+    void ajouterUV();
+private slots:
+    void activerSauver(QString str="");
+public:
+    explicit UVAjout(QWidget* parent=0);
 };
 
 
