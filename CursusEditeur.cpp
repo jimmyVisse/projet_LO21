@@ -54,12 +54,44 @@ void CEditeur::supprUV()
 {
     try {
         unsigned int i=0;
-        //On retrouve l'UV sélectionnée par l'itérateur
+        //On retrouve l'UV sélectionnée dans la ComboBox via l'itérateur de Formation
         Formation::Iterateur it = CursusManager::getInstance().getFormation(f->getNom()).begin();
         while(i<listeUV->currentIndex()) { i++; it.next(); }
+        //On ajoute l'UV retrouvée
         CursusManager::getInstance().supprimerUVCursus(nom->text(), it.currentItem().getCode());
         QMessageBox::information(this, "Suppression d'une UV à un cursus", "UV supprimée du cursus");
     }catch(UTProfilerException& e) {
         QMessageBox::warning(this, "Suppression d'une UV à un cursus", "Erreur"+e.getInfo());
+    }
+}
+
+CAjout::CAjout(QWidget *parent): QWidget(parent) {
+    setWindowTitle("Editeur de cursus");
+
+    nomLabel = new QLabel("nom du cursus: ", this);
+    nom = new QLineEdit(this);
+    ajouter = new QPushButton("Ajouter", this);
+
+    coucheH1 = new QHBoxLayout;
+    coucheH1->addWidget(nomLabel);
+    coucheH1->addWidget(nom);
+    coucheH2 = new QHBoxLayout;
+    coucheH2->addWidget(ajouter);
+    couche = new QVBoxLayout;
+    couche->addLayout(coucheH1);
+    couche->addLayout(coucheH2);
+    setLayout(couche);
+
+    connect(ajouter, SIGNAL(clicked()), this, SLOT(ajout()));
+}
+
+void CAjout::ajout()
+{
+    try {
+        CursusManager::getInstance().ajouterCursus(nom->text());
+        QMessageBox::information(this, "Ajout d'un cursus", "Cursus ajouté");
+    }
+    catch(UTProfilerException& e) {
+        QMessageBox::warning(this, "Ajout d'un cursus", e.getInfo());
     }
 }

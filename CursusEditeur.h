@@ -36,5 +36,19 @@ public slots:
     void supprUV();
 };
 
+class CAjout: public QWidget {
+    Q_OBJECT
+private:
+    QHBoxLayout* coucheH1;
+    QHBoxLayout* coucheH2;
+    QVBoxLayout* couche;
+    QLabel* nomLabel;
+    QLineEdit* nom;
+    QPushButton* ajouter;
+public:
+    explicit CAjout(QWidget* parent=0);
+public slots:
+    void ajout();
+};
 
 #endif // CURSUSEDITEUR_H
