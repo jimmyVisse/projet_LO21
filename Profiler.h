@@ -31,6 +31,7 @@ public slots:
     void editCursus();
     void editDossier();
     void chargerDossier();
+    void addCursus();
 };
 
 #endif // PROFILER_H

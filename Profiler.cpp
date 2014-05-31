@@ -1,7 +1,6 @@
 #include "Profiler.h"
 #include "UVEditeur.h"
 #include "UTProfiler.h"
-#include "UVAjout.h"
 #include "supprUV.h"
 
 Profiler::Profiler(QWidget *parent): QMainWindow(parent)
@@ -27,6 +26,7 @@ Profiler::Profiler(QWidget *parent): QMainWindow(parent)
     QMenu* mFormation = menuBar()->addMenu("&Formation");
     QAction *editerCursus = mFormation->addAction("&Editer cursus");
     QAction *supprCursus = mFormation->addAction("&Supprimer cursus");
+    QAction *addCursus = mFormation->addAction("&Ajouter cursus");
 
     connect(actionChargerUV, SIGNAL(triggered()),this,SLOT(openChargerUV()));
     connect(actionQuitter, SIGNAL(triggered()), qApp, SLOT(quit()));
@@ -39,6 +39,7 @@ Profiler::Profiler(QWidget *parent): QMainWindow(parent)
     connect(chargerCursus, SIGNAL(triggered()), this, SLOT(chargerCursus()));
     connect(editerCursus, SIGNAL(triggered()), this, SLOT(editCursus()));
     connect(editerDossier, SIGNAL(triggered()), this, SLOT(editDossier()));
+    connect(addCursus, SIGNAL(triggered()), this, SLOT(addCursus()));
 }
 
 void Profiler::openChargerUV() {
@@ -144,9 +145,20 @@ void Profiler::chargerDossier()
 void Profiler::editDossier()
 {
     try {
-        EditDossier* fenetre = new EditDossier(&Dossier::getInstance());
+        Dossier& d = Dossier::getInstance();
+        EditDossier* fenetre = new EditDossier(&d, this);
         setCentralWidget(fenetre);
     }catch(UTProfilerException& e) {
         QMessageBox::warning(this, "Chargement catalogue cursus", e.getInfo());
+    }
+}
+
+void Profiler::addCursus()
+{
+    try {
+        CAjout *fenetre = new CAjout(this);
+        setCentralWidget(fenetre);
+    }catch(UTProfilerException& e) {
+        QMessageBox::warning(this, "Ajouter cursus", e.getInfo());
     }
 }
