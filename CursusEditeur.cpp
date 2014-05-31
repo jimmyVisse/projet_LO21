@@ -9,8 +9,9 @@ CEditeur::CEditeur(Formation *f, QWidget* parent): f(f), QWidget(parent)
     uvLabel = new QLabel("UVs: ", this);
 
     listeUV = new QComboBox(this);
-    UV* uvs = CursusManager::getInstance().getUVsCursus(f->getNom());
-    listeUV->addItem(uvs->getCode());
+    for(Formation::Iterateur it = CursusManager::getInstance().getFormation(f->getNom()).begin(); !it.isDone(); it.next()) {
+        listeUV->addItem(it.currentItem().getCode());
+    }
 
     ajouter = new QPushButton("Ajouter une UV", this);
     supprimer = new QPushButton("Supprimer l'UV", this);
@@ -48,6 +49,17 @@ void CEditeur::ajoutUV()
     }
 }
 
+//Slot pour supprimer l'UV sélectionnée dans la ComboBox
 void CEditeur::supprUV()
 {
+    try {
+        unsigned int i=0;
+        //On retrouve l'UV sélectionnée par l'itérateur
+        Formation::Iterateur it = CursusManager::getInstance().getFormation(f->getNom()).begin();
+        while(i<listeUV->currentIndex()) { i++; it.next(); }
+        CursusManager::getInstance().supprimerUVCursus(nom->text(), it.currentItem().getCode());
+        QMessageBox::information(this, "Suppression d'une UV à un cursus", "UV supprimée du cursus");
+    }catch(UTProfilerException& e) {
+        QMessageBox::warning(this, "Suppression d'une UV à un cursus", "Erreur"+e.getInfo());
+    }
 }
