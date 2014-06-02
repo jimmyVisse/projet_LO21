@@ -114,7 +114,7 @@ class Manager {
 protected:
     QString file;
     Manager(const QString& f="");
-    ~Manager();
+    virtual ~Manager();
 public:
     virtual void load(const QString& f);
     virtual void lireFichier(QXmlStreamReader& xml) = 0;
@@ -132,7 +132,7 @@ private:
     UVManager(const UVManager& um);
     UVManager& operator=(const UVManager& um);
     UVManager(const QString& f);
-    ~UVManager();
+    virtual ~UVManager();
     friend struct Handler;
     struct Handler{
         UVManager* instance;
@@ -175,12 +175,25 @@ private:
 
 public:
     Formation(const QString& n);
-    ~Formation();
+    virtual ~Formation();
     const QString getNom() const { return nom; }
     UV& getUV(const QString &code) const;
     void ajoutUV(UV& uv);
+    void supprimerUV(UV& uv);
+    class Iterateur {
+    private:
+        UV** current;
+        unsigned int nbRestant;
+        friend class Formation;
+        Iterateur(UV** u, unsigned int nb): current(u), nbRestant(nb) {}
+    public:
+        Iterateur(): current(0), nbRestant(0) {}
+        bool isDone() const { return nbRestant==0; }
+        UV& currentItem() const { return **current; }
+        void next() { current++; nbRestant--; }
+    };
+    Iterateur begin() { return Iterateur(uvs, nb_Uvs); }
 };
-
 
 class Dossier {
 private:
@@ -200,7 +213,7 @@ private:
 
 public:
     Dossier(const QString &n, const QString& p);
-    ~Dossier();
+    virtual ~Dossier();
     static Dossier& getInstance();
     static void libererInstance();
     void chargerDossier(const QString& f);
@@ -210,8 +223,11 @@ public:
     unsigned int getNbCredits() const { return nb_Credits; }
     Formation getCursus() const { return cursus; }
     void setCursus(const Formation& f);
+    void setNom(const QString& n) { nomEtu=n; }
+    void setPrenom(const QString& p) { prenomEtu=p; }
+    void addCredits();
     void ajouterEquivalence(unsigned int credits);
-    void ajoutInscription(const UV& uv, Note res, Semestre sem);
+    void ajoutInscription(const QString& uv, const QString& res, const QString& sem);
     void enregistrerSolution(UV** sol);
     UV** completerCursus();
 };
@@ -220,7 +236,7 @@ public:
 class CursusManager: public Manager {
     QMap<QString, Formation*> cursus;
     CursusManager(const QString& f);
-    ~CursusManager();
+    virtual ~CursusManager();
     Formation* trouverCursus(const QString& f) const;
     friend struct Handler;
     struct Handler{
@@ -235,11 +251,12 @@ public:
     static void libererInstance();
     void lireFichier(QXmlStreamReader& xml);
     void ecrireFichier(QXmlStreamWriter* r);
-    void supprimerCurusus(const QString& c);
+    void supprimerCursus(const QString& c);
     void ajouterCursus(const QString& n);
     void ajouterUVCursus(const QString& n, const QString& uv);
+    void supprimerUVCursus(const QString& n, const QString& uv);
     Formation& getFormation(const QString& f);
-    UV *getUVsCursus(const QString& f);
+    UV** getUVsCursus(const QString& f);
 };
 
 

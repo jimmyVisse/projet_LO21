@@ -109,14 +109,16 @@ QString SemestreToString(const Semestre& sem)
     QString str;
     switch(sem.getSaison())
     {
-        case Automne: str+QString("A");
+        case Automne: str="A";
             break;
-        case Printemps: str+QString("P");
+        case Printemps: str="P";
             break;
         default: throw UTProfilerException("Erreur, saison non traitee");
             break;
     }
-    str = str+QString(sem.getAnnee());
+    QString an;
+    an.setNum(sem.getAnnee());
+    str = str+an;
 
     return str;
 }
@@ -124,6 +126,8 @@ QString SemestreToString(const Semestre& sem)
 //Transformation d'une chaine de caractère en Semestre
 Semestre StringToSemestre(const QString& s)
 {
+    QString saison = s.mid(0,1);
+    unsigned int annee = s.mid(1, 4).toUInt();
     return Semestre(StringToSaison(s.mid(0, 1)), s.mid(1,4).toUInt()); //utilisation de mid qui renvoie permet d'extraire des sous-chaines d'une chaine de caractères
 }
 
@@ -249,6 +253,20 @@ void UVManager::ecrireFichier(QXmlStreamWriter *r) {
     }
 }
 
+UVManager::Handler UVManager::handler=Handler();
+
+UVManager& UVManager::getInstance(){
+    if (!handler.instance) {
+        QString chemin("C:/Users/Jimmy/Documents/utc/GI/LO21/projet_lo21/UV_XML.xml");
+        handler.instance = new UVManager(chemin); /* instance créée une seule fois lors de la première utilisation*/
+    }
+    return *handler.instance;
+}
+
+void UVManager::libererInstance(){
+    if (handler.instance) { delete handler.instance; handler.instance=0; }
+}
+
 UVManager::UVManager(const QString &f): Manager(f), modification(false) {}
 
 UVManager::~UVManager(){
@@ -292,7 +310,7 @@ UV* UVManager::trouverUV(const QString& c)const{
 
 UV& UVManager::getUV(const QString& code){
     UV* uv=trouverUV(code);
-    if (!uv) throw UTProfilerException("erreur, UVManager, UV inexistante"+code);
+    if (!uv) throw UTProfilerException("erreur, UVManager, UV inexistante "+code);
     return *uv;
 }
 
@@ -302,36 +320,22 @@ const UV& UVManager::getUV(const QString& code)const{
         // on peut aussi dupliquer le code de la méthode non-const
 }
 
-UVManager::Handler UVManager::handler=Handler();
 
-UVManager& UVManager::getInstance(){
-    if (!handler.instance) {
-        QString chemin("C:/Users/Jimmy/Documents/utc/GI/LO21/projet_lo21/UV_XML.xml");
-        handler.instance = new UVManager(chemin); /* instance créée une seule fois lors de la première utilisation*/
-    }
-    return *handler.instance;
-}
-
-void UVManager::libererInstance(){
-    if (handler.instance) { delete handler.instance; handler.instance=0; }
-}
-
-Dossier::Dossier(const QString& n, const QString &p): nomEtu(n), prenomEtu(p), nb_Credits(0), file(""), cursus(""), inscriptions()
+Dossier::Dossier(const QString& n, const QString &p): nomEtu(n), prenomEtu(p), inscriptions(), cursus(""), nb_Credits(0), file("")
 {}
 
 Dossier::~Dossier()
 {
-    nb_Credits=0;
     if(file!="") sauverDossier(file);
-    for(unsigned int i=0; i<inscriptions.size(); i++) delete inscriptions[i];
+    for(int i=0; i<inscriptions.size(); i++) delete inscriptions[i];
     inscriptions.clear();
+    nb_Credits=0;
 }
 
 Dossier::Handler Dossier::handler=Handler();
 
 Dossier& Dossier::getInstance(){
     if (!handler.instance) {
-//        QString chemin("C:/Users/Jimmy/Documents/utc/GI/LO21/projet_lo21/UV_XML.xml");
         handler.instance = new Dossier("", ""); /* instance créée une seule fois lors de la première utilisation*/
     }
     return *handler.instance;
@@ -390,7 +394,8 @@ void Dossier::chargerDossier(const QString& f)
 
                 // If it's named etudiant, we'll dig the information from there.
                 if(xml.name() == "inscription") {
-                    Note resultat;
+//                    Note resultat;
+                    QString resultat;
                     QString semestre;
                     QString uv;
 
@@ -403,7 +408,8 @@ void Dossier::chargerDossier(const QString& f)
                         if(xml.tokenType() == QXmlStreamReader::StartElement) {
                             if(xml.name() == "resultat") {
                                 xml.readNext();
-                                resultat = StringToNote(xml.text().toString());
+//                                resultat = StringToNote(xml.text().toString());
+                                resultat = xml.text().toString();
                             }
                             if(xml.name() == "semestre") {
                                 xml.readNext();
@@ -416,10 +422,13 @@ void Dossier::chargerDossier(const QString& f)
                         }
                         xml.readNext();
                     }
-                    ajoutInscription(UVManager::getInstance().getUV(uv), resultat, StringToSemestre(semestre));
+                    //Ajout de l'inscription précédemment lue
+                    ajoutInscription(uv, resultat, semestre);
                 }
+                //Ajout des crédits correspondants à toutes les inscriptions du dossier
             }
         }
+        addCredits();
         // Error handling.
         if(xml.hasError()) {
             throw UTProfilerException("Erreur lecteur fichier Dossier, parser xml");
@@ -440,7 +449,7 @@ void Dossier::sauverDossier(const QString& f)
      stream.writeAttribute("nom", nomEtu);
      stream.writeAttribute("prenom", prenomEtu);
      stream.writeAttribute("cursus", cursus.getNom());
-     for(QVector<Inscription*>::iterator it = inscriptions.begin(); it!=inscriptions.end(); it++) {
+     for(QVector<Inscription*>::Iterator it = inscriptions.begin(); it!=inscriptions.end(); it++) {
          stream.writeStartElement("inscriprion");
          stream.writeTextElement("resultat", NoteToString((*it)->getResultat()));
          stream.writeTextElement("semestre",SemestreToString((*it)->getSemestre()));
@@ -458,6 +467,18 @@ void Dossier::setCursus(const Formation& f)
     cursus=f;
 }
 
+void Dossier::addCredits() {
+    for(QVector<Inscription*>::Iterator it = inscriptions.begin(); it!=inscriptions.end(); it++) {
+        switch((*it)->getResultat()) {
+            case A: case B: case C: case D: case E:
+                QString codeUV = (*it)->getUV().getCode();
+                unsigned int cred = UVManager::getInstance().getUV(codeUV).getNbCredits();
+                nb_Credits += cred;
+                break;
+        }
+    }
+}
+
 //Incrémentation du compteur de crédits ECTS du dossier par un nombre de crédits acquis durant la précédente formation
 void Dossier::ajouterEquivalence(unsigned int credits)
 {
@@ -465,11 +486,13 @@ void Dossier::ajouterEquivalence(unsigned int credits)
 }
 
 //Ajout d'une inscription à un dossier via la méthode push_back du conteneur Vector
-void Dossier::ajoutInscription(const UV& uv, Note res, Semestre sem)
+void Dossier::ajoutInscription(const QString &uv, const QString &res, const QString &sem)
 {
-    inscriptions.push_back(new Inscription(uv, sem, res));
+    UV& u = UVManager::getInstance().getUV(uv);
+    Note r = StringToNote(res);
+    Semestre s = StringToSemestre(sem);
+    inscriptions.push_back(new Inscription(u, s, r));
 }
-
 
 Formation::Formation(const QString& n): nom(n), uvs(0), nb_Uvs(0), nbMaxUvs(0)
 {}
@@ -501,6 +524,23 @@ void Formation::ajoutUV(UV& uv)
         delete[] oldUvs;
     }
     uvs[nb_Uvs++] = &uv;
+}
+
+void Formation::supprimerUV(UV &uv)
+{
+    unsigned int i=0;
+    bool trouver=false;
+    while(i<nb_Uvs && trouver==false) {
+        if(uvs[i]->getCode()!=uv.getCode()) i++;
+        else trouver=true;
+    }
+    if(i<nb_Uvs) {
+        for(unsigned int j=i; j<nb_Uvs-1; j++)
+            uvs[j]=uvs[j+1];
+        nb_Uvs--;
+    }
+    else
+        throw UTProfilerException("Erreur, uv non présente dans ce cursus");
 }
 
 
@@ -590,7 +630,7 @@ Formation *CursusManager::trouverCursus(const QString& f) const {
     return 0;
 }
 
-void CursusManager::supprimerCurusus(const QString& c)
+void CursusManager::supprimerCursus(const QString& c)
 {
     if(!trouverCursus(c))
         throw UTProfilerException("Erreur supprimer cursus, formation inexistante");
@@ -600,13 +640,13 @@ void CursusManager::supprimerCurusus(const QString& c)
 void CursusManager::ajouterCursus(const QString& n)
 {
     if(trouverCursus(n))
-        throw UTProfilerException("Erreur ajouter cursus, formation déjà existante");
+        throw UTProfilerException("Erreur ajouter cursus, formation non existante");
     cursus[n]=new Formation(n);
 }
 
 void CursusManager::ajouterUVCursus(const QString &n, const QString &uv) {
-    if(trouverCursus(n))
-        throw UTProfilerException("Erreur ajouter une UV à un cursus, formation déjà existante");
+    if(!trouverCursus(n))
+        throw UTProfilerException("Erreur ajouter une UV à un cursus, formation non existante");
     UV& u = UVManager::getInstance().getUV(uv);
     cursus[n]->ajoutUV(u);
 }
@@ -617,14 +657,21 @@ Formation& CursusManager::getFormation(const QString& f) {
     return *cursus[f];
 }
 
-UV* CursusManager::getUVsCursus(const QString& f) {
+UV **CursusManager::getUVsCursus(const QString& f) {
     if(!trouverCursus(f))
         throw UTProfilerException("Erreur, cursus inexistant");
-    Formation* c = cursus[f];
-//    UV** uvs;
-//    for(unsigned int i=0; i<c->nb_Uvs; i++) {
-//        uvs[i] = c->uvs[i];
-//    }
-    return c->uvs[0];
+    UV** uvs = new UV*[cursus[f]->nb_Uvs];
+    for(unsigned int i=0; i<cursus[f]->nb_Uvs; i++) {
+        uvs[i] = cursus[f]->uvs[i];
+    }
+    return uvs;
+}
+
+void CursusManager::supprimerUVCursus(const QString &n, const QString &uv)
+{
+    if(!trouverCursus(n))
+        throw UTProfilerException("Erreur, suppirmer une UV à un cursus, cursus inexistant");
+    UV& u = UVManager::getInstance().getUV(uv);
+    cursus[n]->supprimerUV(u);
 }
 
