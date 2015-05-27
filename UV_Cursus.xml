@@ -5,7 +5,7 @@
 		<uv>BL09</uv>
 		<uv>BL22</uv>
 		<uv>BT02</uv>
-		<uv>C2I</uv>
+		<uv>C2I1</uv>
 		<uv>CM01</uv>
 		<uv>CM11</uv>
 		<uv>CM12</uv>
@@ -33,7 +33,6 @@
 		<uv>TN06</uv>
 		<uv>TR91</uv>
 		<uv>TX</uv>
-		<uv>EN90</uv>
 		<uv>NF93</uv>
 		<uv>NP94</uv>
 		<uv>PS95</uv>
@@ -42,7 +41,7 @@
 	</cursus>
 	<cursus nom="HuTech">
 		<uv>BL01</uv>
-		<uv>C2I</uv>
+		<uv>C2I1</uv>
 		<uv>DI05</uv>
 		<uv>MT31</uv>
 		<uv>MT32</uv>

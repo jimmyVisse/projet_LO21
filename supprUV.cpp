@@ -5,9 +5,7 @@ SupprUV::SupprUV(QWidget* parent): QWidget(parent)
     this->setWindowTitle("Suppression d'une UV");
 
     texte = new QLabel("Quelle UV souhaitez-vous supprimer ? ", this);
-
     chUV = new QLineEdit(this);
-
     bouton = new QPushButton("OK", this);
 
     coucheH1 = new QHBoxLayout;
@@ -20,12 +18,14 @@ SupprUV::SupprUV(QWidget* parent): QWidget(parent)
     couche->addLayout(coucheH2);
     setLayout(couche);
 
-    QObject::connect(bouton, SIGNAL(clicked()), this, SLOT(openChoix()));
+    QObject::connect(bouton, SIGNAL(clicked()), this, SLOT(suppr()));
 }
 
-void SupprUV::openChoix()
+//Slot pour la suppression d'une UV
+void SupprUV::suppr()
 {
     try {
+        //Utilisation d'une méthode de la classe UVManager pour agir sur le catalogue des UVs
         UVManager::getInstance().supprimerUV(chUV->text());
          QMessageBox::information(this, "Suppression d'une UV", "UV supprimée ...");
     }

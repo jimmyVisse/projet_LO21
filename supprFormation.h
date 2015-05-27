@@ -9,8 +9,9 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QMessageBox>
-#include "UTProfiler.h"
+#include "formation.h"
 
+//Classe permettant de supprimer une formation
 class SupprimerFormation: public QWidget {
     Q_OBJECT
 private:

@@ -1,78 +1,66 @@
+/*
+ * Fichier contenant la classe de gestion d'un dossier
+*/
+
 #ifndef DOSSIER_H
 #define DOSSIER_H
 
-#include <QApplication>
-#include <QWidget>
-#include <QLabel>
-#include <QLineEdit>
-#include <QSpinBox>
-#include <QPushButton>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QDialog>
-#include <QMessageBox>
 #include "UTProfiler.h"
+#include "formation.h"
+#include "inscription.h"
+#include "strategie.h"
+#include "solution.h"
+#include "uv.h"
 
-class DossierEdit: public QWidget {
-protected:
-    QLabel* texte;
-    QLabel* nomLabel;
-    QLabel* prenomLabel;
-    QLabel* cursusLabel;
-    QLineEdit* nom;
-    QLineEdit* prenom;
-    QLineEdit* cursus;
-    QPushButton* bouton;
-    QHBoxLayout* coucheH1;
-    QHBoxLayout* coucheH2;
-    QHBoxLayout* coucheH3;
-    QHBoxLayout* coucheH4;
-    QHBoxLayout* coucheH5;
-    QVBoxLayout* couche;
-public:
-    DossierEdit(QWidget* parent=0);
-};
-
-class NewDossier: public DossierEdit {
-    Q_OBJECT
-public:
-    explicit NewDossier(QWidget *parent=0);
-public slots:
-};
-
-class EditDossier: public DossierEdit {
-    Q_OBJECT
+//Classe gérant le dossier d'un étudiant
+class Dossier {
 private:
-    Dossier& d;
-    QLabel* cred;
-    QPushButton* ajouter;
-    QSpinBox* credits;
-public:
-    explicit EditDossier(Dossier &dToEdit, QWidget* parent=0);
-public slots:
-    void modifDossier();
-    void ajoutIns();
-};
+    QString nomEtu;
+    QString prenomEtu;
+    QVector<Inscription*> inscriptions;
+    Formation cursus;
+    unsigned int nb_CreditsCS;
+    unsigned int nb_CreditsTM;
+    unsigned int nbSemestre;
+    QString file;
+    friend struct Handler;
+    //Singleton
+    struct Handler{
+        Dossier* instance;
+        Handler():instance(0){}
+        ~Handler(){ if (instance) delete instance; instance=0; }
+    };
+    static Handler handler;
+    virtual ~Dossier();
+    Dossier(const QString &n, const QString& p);
+    Strategie* strat;
+    QVector<Solution*> sol;
 
-class AjoutDossier: public QDialog {
-    Q_OBJECT
-private:
-    QLabel* uvLabel;
-    QLabel* noteLabel;
-    QLabel* semLabel;
-    QLineEdit* uv;
-    QLineEdit* note;
-    QLineEdit* semestre;
-    QPushButton* valider;
-    QHBoxLayout* coucheH1;
-    QHBoxLayout* coucheH2;
-    QHBoxLayout* coucheH3;
-    QHBoxLayout* coucheH4;
-    QVBoxLayout* couche;
-public slots:
-    void ajouter();
 public:
-    explicit AjoutDossier(QWidget* parent=0);
+    static Dossier& getInstance();
+    static void libererInstance();
+    void chargerDossier(const QString& f);
+    void sauverDossier(const QString& f);
+    const QString getNom() const { return nomEtu; }
+    const QString getPrenom() const { return prenomEtu; }
+    unsigned int getNbCredits() const { return nb_CreditsCS+nb_CreditsTM; }
+    Formation getCursus() const { return cursus; }
+    void setCursus(const Formation& f);
+    void setNom(const QString& n) { nomEtu=n; }
+    void setPrenom(const QString& p) { prenomEtu=p; }
+    void setFile(const QString& f) { file=f; }
+    void setNbSemestre(unsigned int nb) { nbSemestre=nb; }
+    void addCredits();
+    void ajouterEquivalence(unsigned int creditsCS, unsigned int creditsTM);
+    void ajoutInscription(const QString& uv, const QString& res, const QString& sem);
+    void enregistrerSolution(Solution* s);
+    void completerCursus();
+    void lireSolution(const QString& f);
+    void ajoutInscSolution(const QString& uv, const QString& s);
+
+    //Méthode permettant d'accéder "publiquement" à l'itérateur du vecteur d'inscription
+    QVector<Inscription*>::iterator begin_ins() { return inscriptions.begin(); }
+    QVector<Inscription*>::iterator end_ins() { return inscriptions.end(); }
 };
 
 #endif // DOSSIER_H

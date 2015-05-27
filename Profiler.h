@@ -32,6 +32,23 @@ public slots:
     void editDossier();
     void chargerDossier();
     void addCursus();
+    void fermerDossier();
+    void ins();
+};
+
+class Accueil : public QDialog {
+    Q_OBJECT
+private:
+    QLabel* message;
+    QPushButton* valider;
+    QPushButton* annuler;
+    QVBoxLayout* coucheH1;
+    QVBoxLayout* coucheH2;
+    QHBoxLayout* couche;
+public:
+    explicit Accueil(QWidget* parent=0);
+public slots:
+    void supprimer();
 };
 
 #endif // PROFILER_H

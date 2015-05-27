@@ -2,11 +2,13 @@
 
 SupprimerFormation::SupprimerFormation(QWidget* parent): QWidget(parent)
 {
+    /* Création des widgets de la classe */
+
     texte = new QLabel("Sélectionner la formation à supprimer: ", this);
-
     valider = new QPushButton("Valider", this);
-
     choixCursus = new QLineEdit(this);
+
+    /* Mise en forme */
 
     coucheH1 = new QHBoxLayout;
     coucheH1->addWidget(texte);
@@ -21,10 +23,12 @@ SupprimerFormation::SupprimerFormation(QWidget* parent): QWidget(parent)
     connect(valider, SIGNAL(clicked()), this, SLOT(supprimer()));
 }
 
+//Suppression du cursus
 void SupprimerFormation::supprimer()
 {
     try {
-        CursusManager::getInstance().supprimerCurusus(choixCursus->text());
+        //utilisation d'une méthode de la classe CursusManager pour agir sur le catalogue des cursus
+        CursusManager::getInstance().supprimerCursus(choixCursus->text());
         QMessageBox::information(this, "Suppression Formation", "Cursus supprimé ...");
     }catch(UTProfilerException& e) {
         QMessageBox::warning(this, "Suppression Formation", e.getInfo());

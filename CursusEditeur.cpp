@@ -1,8 +1,10 @@
 #include "CursusEditeur.h"
 
-CEditeur::CEditeur(Formation *f, QWidget* parent): f(f), QWidget(parent)
+CEditeur::CEditeur(Formation *f, QWidget* parent): QWidget(parent), f(f)
 {
     setWindowTitle("Editeur de cursus");
+
+    /*Création des widgets de la fenêtre*/
 
     nomLabel = new QLabel("nom du cursus: ", this);
     nom = new QLineEdit(f->getNom(), this);
@@ -15,6 +17,8 @@ CEditeur::CEditeur(Formation *f, QWidget* parent): f(f), QWidget(parent)
 
     ajouter = new QPushButton("Ajouter une UV", this);
     supprimer = new QPushButton("Supprimer l'UV", this);
+
+    /*Mise en forme de la fenêtre*/
 
     coucheH1 = new QHBoxLayout;
     coucheH1->addWidget(nomLabel);
@@ -35,11 +39,14 @@ CEditeur::CEditeur(Formation *f, QWidget* parent): f(f), QWidget(parent)
     connect(supprimer, SIGNAL(clicked()), this, SLOT(supprUV()));
 }
 
+//Slot d'ajout d'une UV
 void CEditeur::ajoutUV()
 {
+    //On demande le code de l'UV à ajouter
     QString code=QInputDialog::getText(this,"Entrez le code de l’UV à éditer","UV");
     if(code!="") {
         try {
+            //Si l'UV existe, on l'insére dans le curus sélectionné via une méthode de la classe CursusManager
             CursusManager::getInstance().ajouterUVCursus(nom->text(), code);
             QMessageBox::information(this, "Ajouter une UV à un cursus", "UV insérée à la formation");
         }
@@ -53,11 +60,11 @@ void CEditeur::ajoutUV()
 void CEditeur::supprUV()
 {
     try {
-        unsigned int i=0;
+        int i=0;
         //On retrouve l'UV sélectionnée dans la ComboBox via l'itérateur de Formation
         Formation::Iterateur it = CursusManager::getInstance().getFormation(f->getNom()).begin();
         while(i<listeUV->currentIndex()) { i++; it.next(); }
-        //On ajoute l'UV retrouvée
+        //On supprime l'UV retrouvée
         CursusManager::getInstance().supprimerUVCursus(nom->text(), it.currentItem().getCode());
         QMessageBox::information(this, "Suppression d'une UV à un cursus", "UV supprimée du cursus");
     }catch(UTProfilerException& e) {
@@ -65,6 +72,7 @@ void CEditeur::supprUV()
     }
 }
 
+//Constructeur de la classe permettant l'ajout d'une formation
 CAjout::CAjout(QWidget *parent): QWidget(parent) {
     setWindowTitle("Editeur de cursus");
 
@@ -85,6 +93,7 @@ CAjout::CAjout(QWidget *parent): QWidget(parent) {
     connect(ajouter, SIGNAL(clicked()), this, SLOT(ajout()));
 }
 
+//Ajout d'un cursus au catalogue des cursus
 void CAjout::ajout()
 {
     try {

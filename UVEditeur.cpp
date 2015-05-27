@@ -29,6 +29,8 @@ Editeur::Editeur(QWidget *parent): QWidget(parent) {
     catego->addItem("TSH");
     catego->addItem("SP");
 
+    /* Mise en forme commune aux 2 fenêtres UVEditeur et UVAjout */
+
     coucheH1 = new QHBoxLayout;
     coucheH1->addWidget(codeLabel);
     coucheH1->addWidget(code);
@@ -58,6 +60,8 @@ UVEditeur::UVEditeur(UV& uvToEdit, QWidget *parent): Editeur(parent), uv(uvToEdi
 {
     this->setWindowTitle(QString("Edition de l' UV ")+uv.getCode());
 
+    /* Contextualisation des attributs communs à l'UV à éditer */
+
     code->setText(uv.getCode());
     titre->setPlainText(uv.getTitre());
 
@@ -71,6 +75,7 @@ UVEditeur::UVEditeur(UV& uvToEdit, QWidget *parent): Editeur(parent), uv(uvToEdi
 
     catego->setCurrentIndex(int(uv.getCategorie()));
 
+    //Affichage de la mise en forme effectuée dans la classe mère
     setLayout(couche);
 
     QObject::connect(sauver, SIGNAL(clicked()), this, SLOT(sauverUV()));
@@ -83,8 +88,10 @@ UVEditeur::UVEditeur(UV& uvToEdit, QWidget *parent): Editeur(parent), uv(uvToEdi
     QObject::connect(annuler, SIGNAL(clicked()), this, SLOT(close()));
 }
 
+//Slot permettant de sauvegarder les changements
 void UVEditeur::sauverUV()
 {
+    //Récupération des données des différents attributs et modifications des données de l'UV via des accesseurs en écriture
     uv.setCode(code->text());
     uv.setTitre(titre->toPlainText());
     uv.setNbCredits(cred->value());
@@ -97,9 +104,11 @@ void UVEditeur::sauverUV()
 
 void UVEditeur::activerSauver(QString)
 {
+    //Activation du bouton "sauver"
     sauver->setEnabled(true);
 }
 
+/* Construction de la classe permettant d'ajouter une UV */
 UVAjout::UVAjout(QWidget* parent): Editeur(parent)
 {
     this->setWindowTitle("Ajout d'une UV");
@@ -118,12 +127,14 @@ UVAjout::UVAjout(QWidget* parent): Editeur(parent)
 void UVAjout::ajouterUV()
 {
     try {
+        //Ajout de l'UV via une méthode spécifique de UVManger
         UVManager::getInstance().ajouterUV(code->text(), titre->toPlainText(), cred->value(), Categorie(catego->currentIndex()), automne->isChecked(), printemps->isChecked());
         QMessageBox::information(this, "Sauvegarde", "UV sauvegardée ...");
     }
     catch(UTProfilerException& e) {
         QMessageBox::critical(this, "Erreur", e.getInfo());
     }
+    //Désactivation du bouton sauver jusqu'à la prochaine modification
     sauver->setEnabled(false);
 }
 

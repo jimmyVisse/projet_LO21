@@ -1,3 +1,7 @@
+/*
+ * Interface graphique pour la suppression d'une UV
+*/
+
 #ifndef SUPPRUV_H
 #define SUPPRUV_H
 
@@ -10,8 +14,9 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QMessageBox>
-#include "UTProfiler.h"
+#include "uv.h"
 
+//Classe pour la suppression d'une UV du catalogue
 class SupprUV: public QWidget {
     Q_OBJECT
 private:
@@ -23,7 +28,7 @@ private:
     QVBoxLayout* couche;
 
 public slots:
-    void openChoix();
+    void suppr();
 
 public:
     explicit SupprUV(QWidget* parent=0);

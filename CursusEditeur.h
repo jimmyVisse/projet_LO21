@@ -1,3 +1,8 @@
+/*
+ * Interface graphique pour l'édition d'un cursus
+ * Ce fichier contient les intefaces pour l'édition et l'ajout
+*/
+
 #ifndef CURSUSEDITEUR_H
 #define CURSUSEDITEUR_H
 
@@ -11,11 +16,13 @@
 #include <QComboBox>
 #include <QMessageBox>
 #include <QInputDialog>
-#include "UTProfiler.h"
+#include "formation.h"
 
+//Fenêtre d'édition d'une formation
 class CEditeur: public QWidget {
     Q_OBJECT
 public:
+    //Transmission de la formation à éditer dans le constructeur de la classe
     explicit CEditeur(Formation* f, QWidget* parent=0);
 
 private:
@@ -36,6 +43,7 @@ public slots:
     void supprUV();
 };
 
+//Fenêtre d'ajout d'un nouveau cursus
 class CAjout: public QWidget {
     Q_OBJECT
 private:

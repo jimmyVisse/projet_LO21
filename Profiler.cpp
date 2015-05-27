@@ -8,6 +8,8 @@ Profiler::Profiler(QWidget *parent): QMainWindow(parent)
     setWindowTitle("UT-Profiler");
     QMenu* mFichier = menuBar()->addMenu("&Fichier");
     QAction *actionQuitter = mFichier->addAction("&Quitter");
+    QAction *closeDossier = mFichier->addAction("&Fermer Dossier");
+
     QMenu* mCharger = menuBar()->addMenu("&Charger");
     QAction *actionChargerUV = mCharger->addAction("Catalogue UVs");
     mFichier->addSeparator();
@@ -22,6 +24,7 @@ Profiler::Profiler(QWidget *parent): QMainWindow(parent)
     QAction *chargerDossier = mDossier->addAction("&Charger Dossier");
     QAction *nouveauDossier = mDossier->addAction("&Nouveau Dossier");
     QAction *editerDossier = mDossier->addAction("&Editer Dossier");
+    QAction *inscDossier = mDossier->addAction("&Inscription Dossier");
 
     QMenu* mFormation = menuBar()->addMenu("&Formation");
     QAction *editerCursus = mFormation->addAction("&Editer cursus");
@@ -40,6 +43,8 @@ Profiler::Profiler(QWidget *parent): QMainWindow(parent)
     connect(editerCursus, SIGNAL(triggered()), this, SLOT(editCursus()));
     connect(editerDossier, SIGNAL(triggered()), this, SLOT(editDossier()));
     connect(addCursus, SIGNAL(triggered()), this, SLOT(addCursus()));
+    connect(closeDossier, SIGNAL(triggered()), this, SLOT(fermerDossier()));
+    connect(inscDossier, SIGNAL(triggered()), this, SLOT(ins()));
 }
 
 void Profiler::openChargerUV() {
@@ -135,8 +140,10 @@ void Profiler::chargerDossier()
 {
     QString chemin = QFileDialog::getOpenFileName();
     try {
-        if(chemin != "") Dossier::getInstance().chargerDossier(chemin);
-        QMessageBox::information(this, "Chargement dossier", "Le dossier a ete charge");
+        if(chemin != "") {
+            Dossier::getInstance().chargerDossier(chemin);
+            QMessageBox::information(this, "Chargement dossier", "Le dossier a ete charge");
+        }
     }catch(UTProfilerException& e) {
         QMessageBox::warning(this, "Chargement catalogue cursus", e.getInfo());
     }
@@ -146,7 +153,7 @@ void Profiler::editDossier()
 {
     try {
         Dossier& d = Dossier::getInstance();
-        EditDossier* fenetre = new EditDossier(&d, this);
+        EditDossier* fenetre = new EditDossier(d, this);
         setCentralWidget(fenetre);
     }catch(UTProfilerException& e) {
         QMessageBox::warning(this, "Chargement catalogue cursus", e.getInfo());
@@ -161,4 +168,50 @@ void Profiler::addCursus()
     }catch(UTProfilerException& e) {
         QMessageBox::warning(this, "Ajouter cursus", e.getInfo());
     }
+}
+
+void Profiler::fermerDossier()
+{
+    try {
+        Accueil *fenetre = new Accueil(this);
+        setCentralWidget(fenetre);
+    }catch(UTProfilerException& e) {
+        QMessageBox::warning(this, "Fermer dossier", e.getInfo());
+    }
+}
+
+void Profiler::ins()
+{
+    try {
+        AjouterIns *fen = new AjouterIns(this);
+        setCentralWidget(fen);
+    }catch(UTProfilerException& e) {
+        QMessageBox::warning(this, "Inscription dossier", e.getInfo());
+    }
+}
+
+Accueil::Accueil(QWidget* parent): QDialog(parent)
+{
+    message = new QLabel("Etes vous sur de vouloir tout fermer ?", this);
+    valider = new QPushButton("Valider", this);
+    annuler = new QPushButton("Annuler", this);
+    coucheH1 = new QVBoxLayout;
+    coucheH1->addWidget(message);
+    coucheH2 = new QVBoxLayout;
+    coucheH2->addWidget(valider);
+    coucheH2->addWidget(annuler);
+    couche = new QHBoxLayout;
+    couche->addLayout(coucheH1);
+    couche->addLayout(coucheH2);
+    setLayout(couche);
+
+    connect(valider, SIGNAL(clicked()), this, SLOT(supprimer()));
+    connect(annuler, SIGNAL(clicked()), this, SLOT(close()));
+}
+
+void Accueil::supprimer()
+{
+    CursusManager::libererInstance();
+    Dossier::libererInstance();
+    UVManager::libererInstance();
 }

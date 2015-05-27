@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dossier nom="Visse" prenom="Jimmy" cursus="TC">
-	<inscription>
-		<resultat>C</resultat>
-		<semestre>A2011</semestre>
-		<uv>MT90</uv>
-	</inscription>
+    <inscription>
+        <resultat>C</resultat>
+        <semestre>A2011</semestre>
+        <uv>MT90</uv>
+    </inscription>
+    <inscription>
+        <resultat>A</resultat>
+        <semestre>A2011</semestre>
+        <uv>MT91</uv>
+    </inscription>
+    <inscription>
+        <resultat>EC</resultat>
+        <semestre>A2014</semestre>
+        <uv>LO21</uv>
+    </inscription>
 </dossier>
