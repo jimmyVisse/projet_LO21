@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>817</width>
+    <height>573</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>UTProfiler</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../../../../../Pictures/logo_utc.png</normaloff>../../../../../Pictures/logo_utc.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QGroupBox" name="choixAction">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>230</y>
+      <width>341</width>
+      <height>261</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Votre choix:</string>
+    </property>
+    <widget class="QWidget" name="verticalLayoutWidget_2">
+     <property name="geometry">
+      <rect>
+       <x>19</x>
+       <y>19</y>
+       <width>301</width>
+       <height>221</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QRadioButton" name="creerDossier">
+        <property name="text">
+         <string>Créer un nouveau dossier</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="chargerDossier">
+        <property name="text">
+         <string>Charger un dossier existant</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="ajoutUV">
+        <property name="text">
+         <string>Ajouter une UV au catalogue</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="supprUV">
+        <property name="text">
+         <string>Supprimer une UV du catalogue</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="editUV">
+        <property name="text">
+         <string>Editer une UV du catalogue</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="ajoutCursus">
+        <property name="text">
+         <string>Ajouter un cursus au catalogue</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="supprCursus">
+        <property name="text">
+         <string>Supprimer un cursus du catalogue</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="editCursus">
+        <property name="text">
+         <string>Editer un cursus du catalogue</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QPushButton" name="valider">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>500</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Valider</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>100</y>
+      <width>781</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Cette application est en lien avec le fonctionnement de la formation à l'Université de Technologie de Compiègne</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Cette application vous permet d'ajouter, éditer, supprimer des UVs ou bien des formations de l'UTC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Par ailleurs, vous pouvez y ajouter vos inscriptions pour laisser ensuite l'application compléter votre cursus !</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>200</y>
+      <width>198</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Que souhaitez-vous faire ?</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>10</y>
+      <width>601</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap>../../../../../Pictures/utc2.png</pixmap>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="font">
+        <font>
+         <pointsize>16</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Bienvenue dans UTProfiler</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>817</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFichier">
+    <property name="title">
+     <string>Fichier</string>
+    </property>
+    <addaction name="actionFermer_dossier"/>
+    <addaction name="actionQuitter"/>
+   </widget>
+   <widget class="QMenu" name="menuCharger">
+    <property name="title">
+     <string>Charger</string>
+    </property>
+    <addaction name="actionDossier"/>
+   </widget>
+   <widget class="QMenu" name="menuUV">
+    <property name="title">
+     <string>UV</string>
+    </property>
+    <addaction name="actionEditer_UV"/>
+    <addaction name="actionAjouter_UV"/>
+    <addaction name="actionSupprimer_UV"/>
+   </widget>
+   <widget class="QMenu" name="menuCursus">
+    <property name="title">
+     <string>Cursus</string>
+    </property>
+    <addaction name="actionAjouter_Cursus"/>
+    <addaction name="actionSupprimer_Cursus"/>
+    <addaction name="actionEditer_Cursus"/>
+   </widget>
+   <widget class="QMenu" name="menuDossier">
+    <property name="title">
+     <string>Dossier</string>
+    </property>
+    <addaction name="actionEditer_Dossier"/>
+    <addaction name="actionAjouter_Inscription"/>
+    <addaction name="actionCompl_ter_dossier"/>
+   </widget>
+   <addaction name="menuFichier"/>
+   <addaction name="menuCharger"/>
+   <addaction name="menuUV"/>
+   <addaction name="menuCursus"/>
+   <addaction name="menuDossier"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionQuitter">
+   <property name="text">
+    <string>Quitter</string>
+   </property>
+  </action>
+  <action name="actionCatalogue_UV">
+   <property name="text">
+    <string>Catalogue UV</string>
+   </property>
+  </action>
+  <action name="actionCatalogue_Cursus">
+   <property name="text">
+    <string>Catalogue Cursus</string>
+   </property>
+  </action>
+  <action name="actionEditer_UV">
+   <property name="text">
+    <string>Editer UV</string>
+   </property>
+  </action>
+  <action name="actionAjouter_UV">
+   <property name="text">
+    <string>Ajouter UV</string>
+   </property>
+  </action>
+  <action name="actionSupprimer_UV">
+   <property name="text">
+    <string>Supprimer UV</string>
+   </property>
+  </action>
+  <action name="actionAjouter_Cursus">
+   <property name="text">
+    <string>Ajouter Cursus</string>
+   </property>
+  </action>
+  <action name="actionSupprimer_Cursus">
+   <property name="text">
+    <string>Supprimer Cursus</string>
+   </property>
+  </action>
+  <action name="actionEditer_Cursus">
+   <property name="text">
+    <string>Editer Cursus</string>
+   </property>
+  </action>
+  <action name="actionEditer_Dossier">
+   <property name="text">
+    <string>Editer Dossier</string>
+   </property>
+  </action>
+  <action name="actionDossier">
+   <property name="text">
+    <string>Dossier</string>
+   </property>
+  </action>
+  <action name="actionAjouter_Inscription">
+   <property name="text">
+    <string>Ajouter Inscription</string>
+   </property>
+  </action>
+  <action name="actionRetour_accueil">
+   <property name="text">
+    <string>Retour accueil</string>
+   </property>
+  </action>
+  <action name="actionCompl_ter_dossier">
+   <property name="text">
+    <string>Compléter dossier</string>
+   </property>
+  </action>
+  <action name="actionFermer_dossier">
+   <property name="text">
+    <string>Fermer dossier</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
